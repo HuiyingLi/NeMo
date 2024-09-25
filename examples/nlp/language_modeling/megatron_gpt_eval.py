@@ -321,7 +321,8 @@ def main(cfg) -> None:
 
     model = load_model_from_config(trainer, cfg)
     model.freeze()
-
+    model.save_to("/workspace/nemo2/te_on_15b.nemo")
+    exit()
     # Have to turn off activations_checkpoint_method for inference
     try:
         model.model.language_model.encoder.activations_checkpoint_method = None
