@@ -38,6 +38,7 @@ class SeparatorStyle(Enum):
     NVGPT = auto()
     QWEN = auto()
     GEMMA = auto()
+    Yi34B = auto()
 
 
 @dataclasses.dataclass
@@ -151,6 +152,12 @@ class Conversation:
             {{ user_message_2 }}<|eot_id|><|start_header_id|>assistant<|end_header_id|>
             """
             tokenizer_name_or_path = self.tokenizer_name_or_path or "meta-llama/Meta-Llama-3-8B-Instruct"
+            ret = self.process_chat_template(tokenizer_name_or_path, messages)
+        
+        elif self.sep_style == SeparatorStyle.Yi34B:
+            """
+            """
+            tokenizer_name_or_path = self.tokenizer_name_or_path or "01-ai/Yi-1.5-34B-Chat"
             ret = self.process_chat_template(tokenizer_name_or_path, messages)
 
         elif self.sep_style == SeparatorStyle.NVGPT:
@@ -641,6 +648,18 @@ Answer the questions.""",
     sep="<|im_end|>",
 )
 
+conv_yi_34b = Conversation(
+    system="",
+    roles=("user", "assistant"),
+    version="1.5",
+    messages=[],
+    offset=0,
+    sep="\n",
+    sep_style=SeparatorStyle.Yi34B,
+    tokenizer_name_or_path="01-ai/Yi-1.5-34B-Chat",
+    stop_str="<|im_end|>\n"
+)
+
 default_conversation = conv_vicuna_v1
 conv_templates = {
     "default": conv_vicuna_v1,
@@ -671,6 +690,7 @@ conv_templates = {
     "nvgpt": conv_nvgpt,
     "nv_steerlm": conv_nvgpt,
     "nv_dpo": conv_nv_dpo,
+    "yi_34b": conv_yi_34b,
 }
 
 if __name__ == "__main__":

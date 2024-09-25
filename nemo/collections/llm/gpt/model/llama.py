@@ -202,6 +202,15 @@ class CodeLlamaConfig70B(Llama2Config70B):
     pass
 
 
+@dataclass
+class Yi15Config34B(LlamaConfig):
+    num_layers: int = 15
+    hidden_size: int = 7168
+    num_attention_heads: int = 56
+    num_query_groups: int = 8
+    ffn_hidden_size: int = 20480
+
+
 class LlamaModel(GPTModel):
     def __init__(
         self,
@@ -474,5 +483,6 @@ __all__ = [
     "CodeLlamaConfig13B",
     "CodeLlamaConfig34B",
     "CodeLlamaConfig70B",
+    "Yi15Config34B",
     "LlamaModel",
 ]

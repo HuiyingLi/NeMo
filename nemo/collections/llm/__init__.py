@@ -85,6 +85,7 @@ from nemo.collections.llm.gpt.model import (
     StarcoderConfig,
     StarcoderConfig15B,
     StarcoderModel,
+    Yi15Config34B,
     gpt_data_step,
     gpt_forward_step,
 )
