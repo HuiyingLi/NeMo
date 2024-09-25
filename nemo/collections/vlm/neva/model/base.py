@@ -262,10 +262,21 @@ class NevaConfig(TransformerConfig, io.IOMixin):
         vision_projection = self.vision_projection_config.configure_model()
 
         if self.language_model_from_pretrained is not None:
+            from megatron.core.dist_checkpointing.dict_utils import dict_list_map_inplace
+            from megatron.core.dist_checkpointing.mapping import LocalNonpersitentObject, ShardedObject
+            def skip_fp8_load(x):
+                if isinstance(x, ShardedObject) and 'fused_attention' in x.key and '_extra_state' in x.key:
+                #if isinstance(x, ShardedObject) and '_extra_state' in x.key:
+                    x = LocalNonpersitentObject(x.data)  # use the FP8 state from initialization, not from ckpt
+                return x
+            #sharded_state_dict = language_model.sharded_state_dict(prefix="model.") #need to be "model" for nemotron15b nemo1 ckpt
             sharded_state_dict = dict(state_dict=language_model.sharded_state_dict(prefix="module."))
+            dict_list_map_inplace(skip_fp8_load, sharded_state_dict)
+            #sharded_state_dict = dict(state_dict=sharded_state_dict)
             loaded_state_dict = dist_checkpointing.load(
                 sharded_state_dict=sharded_state_dict, checkpoint_dir=self.language_model_from_pretrained
             )
+            #loaded_state_dict = {k.removeprefix("model."): v for k, v in loaded_state_dict["state_dict"].items()} #need to be "model" for nemotron15b nemo1 ckpt
             loaded_state_dict = {k.removeprefix("module."): v for k, v in loaded_state_dict["state_dict"].items()}
             language_model.load_state_dict(loaded_state_dict)
             logging.info(f"Restored language model weights from {self.language_model_from_pretrained}")
