@@ -206,7 +206,7 @@ class CodeLlamaConfig70B(Llama2Config70B):
 
 @dataclass
 class Yi15Config34B(LlamaConfig):
-    num_layers: int = 15
+    num_layers: int = 60
     hidden_size: int = 7168
     num_attention_heads: int = 56
     num_query_groups: int = 8
