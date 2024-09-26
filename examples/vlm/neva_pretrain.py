@@ -90,12 +90,12 @@ def main(args):
 
     # Checkpoint callback setup
     checkpoint_callback = nl.ModelCheckpoint(
-        save_best_model=False,
+        #save_best_model=False,
         save_last=True,
         monitor="reduced_train_loss",
         save_top_k=2,
         every_n_train_steps=1000,
-        enable_nemo_ckpt_io=False,
+        #enable_nemo_ckpt_io=False,
         dirpath=args.log_dir,
     )
 
@@ -117,7 +117,7 @@ def main(args):
     from pytorch_lightning.loggers import WandbLogger
 
     nemo_logger = nl.NeMoLogger(
-        dir=args.log_dir,
+        log_dir=args.log_dir,
         name=args.name,
         wandb=WandbLogger(project=args.wandb_project, name=args.name) if args.wandb_project is not None else None,
     )
