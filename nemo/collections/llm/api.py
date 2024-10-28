@@ -467,6 +467,36 @@ def generate(
 
     return [r.generated_text if text_only else r for r in results]
 
+@run.cli.entrypoint(name="eval", namespace="llm")
+def eval(
+    trainer: nl.Trainer,
+    ckpt_path: Union[Path, str],
+    input_datamodule: pl.LightningDataModule,
+    output_path: Union[Path, str],
+    prompts: Optional[list[str]] = None,
+    inference_params: CommonInferenceParams = None,
+) -> None:
+    from megatron.core.inference.common_inference_params import CommonInferenceParams
+    from nemo.utils.get_rank import is_global_rank_zero
+    input_path = input_datamodule.test_path
+
+    with open(input_path) as f:
+        dataset = [json.loads(sample) for sample in f.readlines()]
+        inputs = [sample["input"] for sample in dataset]
+    results = generate(ckpt_path,
+                trainer=trainer,
+                prompts=inputs,
+                inference_params=inference_params,
+                text_only=True)
+    assert len(results) == len(dataset)
+    if is_global_rank_zero():
+        with open(output_path, "w") as f:
+            for sample, pred in zip(dataset, results):
+                line = json.dumps({"input":sample["input"], "label":sample["output"], "prediction":pred})
+                f.writelines(line+"\n")
+    
+    logging.info(f"Evaluation results written to {output_path}")
+    
 
 def _use_tokenizer(model: pl.LightningModule, data: pl.LightningDataModule, tokenizer: TokenizerType) -> None:
     if tokenizer == "data":
